@@ -55,7 +55,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - uses: offload-project/release-champion@v1
@@ -166,7 +166,7 @@ Commits that can't be linked to a PR will reference the commit SHA instead.
 
 ```yaml
 steps:
-  - uses: actions/checkout@v4
+  - uses: actions/checkout@v6
     with:
       fetch-depth: 0
   - uses: offload-project/release-champion@v1
