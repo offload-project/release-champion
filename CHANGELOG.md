@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.2.0 - 2026-03-31
+
+### Added
+- Refine changelog entries ([3486cdc](https://github.com/offload-project/release-champion/commit/3486cdc7904178bd9246e47bad5dbfa2a16e2c31))
+
 ## v1.1.0 - 2026-03-31
 
 ### Added
