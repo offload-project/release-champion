@@ -57,6 +57,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
           fetch-depth: 0
       - uses: offload-project/release-champion@v1
         with:
@@ -168,6 +169,7 @@ Commits that can't be linked to a PR will reference the commit SHA instead.
 steps:
   - uses: actions/checkout@v6
     with:
+      ref: ${{ github.event.pull_request.merge_commit_sha }}
       fetch-depth: 0
   - uses: offload-project/release-champion@v1
     id: release
