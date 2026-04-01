@@ -12,6 +12,10 @@ inputs:
     description: 'Label that marks a PR for release'
     required: false
     default: 'change-release'
+  require-release-label:
+    description: 'Require the release label to trigger a release PR. When false, every merged PR triggers a release.'
+    required: false
+    default: 'false'
   version-prefix:
     description: 'Prefix for version tags (e.g., "v" produces "v1.2.3")'
     required: false
@@ -56,6 +60,7 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.github-token }}
         INPUT_RELEASE_LABEL: ${{ inputs.release-label }}
+        INPUT_REQUIRE_RELEASE_LABEL: ${{ inputs.require-release-label }}
         INPUT_VERSION_PREFIX: ${{ inputs.version-prefix }}
         INPUT_CREATE_TAG: ${{ inputs.create-tag }}
         INPUT_CREATE_RELEASE: ${{ inputs.create-release }}
