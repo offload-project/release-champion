@@ -18,6 +18,13 @@ jobs:
           ref: ${{ github.event.pull_request.merge_commit_sha }}
           fetch-depth: 0
       - uses: ./
+        id: release
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           draft-release: false
+      - name: Update floating major tag
+        if: steps.release.outputs.tag
+        run: |
+          major=$(echo "${{ steps.release.outputs.tag }}" | grep -oE '^v[0-9]+')
+          git tag -f "$major" "${{ steps.release.outputs.tag }}"
+          git push origin "$major" --force
