@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.4.0 - 2026-04-01
+
+### Added
+- Publish to npm or github packages [#11](https://github.com/offload-project/release-champion/pull/11)
+
 ## v1.3.0 - 2026-04-01
 
 ### Added
