@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.4.1 - 2026-04-01
+
+### Other
+- Workflow handle carrying major tag forth ([372a835](https://github.com/offload-project/release-champion/commit/372a835cc2be47aaa82b9e0e4645c43d51fd47b5))
+
 ## v1.4.0 - 2026-04-01
 
 ### Added
