@@ -54,6 +54,21 @@ main() {
 
   git checkout -b "$branch_name"
 
+  # Bump package.json version if npm publishing is enabled
+  if [[ "${INPUT_PUBLISH_NPM:-false}" == "true" ]]; then
+    if [[ ! -f package.json ]]; then
+      echo "::error::publish-npm is enabled but no package.json found"
+      exit 1
+    fi
+    echo "Bumping package.json to ${new_version}"
+    npm version "$new_version" --no-git-tag-version
+    git add package.json
+    if [[ -f package-lock.json ]] && ! git diff --staged --quiet package-lock.json 2>/dev/null; then
+      git add package-lock.json
+    fi
+    git commit -m "chore: bump package version to ${new_version}"
+  fi
+
   # Generate changelog if enabled
   if [[ "$INPUT_CHANGELOG" == "true" ]]; then
     echo "Generating changelog..."
@@ -121,6 +136,14 @@ generate_pr_body() {
       body+="*A **draft** GitHub release will be created.*"$'\n'
     else
       body+="*A GitHub release will be published.*"$'\n'
+    fi
+  fi
+
+  if [[ "${INPUT_PUBLISH_NPM:-false}" == "true" ]]; then
+    if [[ "$INPUT_NPM_REGISTRY" == *"npm.pkg.github.com"* ]]; then
+      body+="*This release will be published to GitHub Packages.*"$'\n'
+    else
+      body+="*This release will be published to npm.*"$'\n'
     fi
   fi
 
