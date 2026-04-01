@@ -74,9 +74,9 @@ main() {
 
     local registry="${INPUT_NPM_REGISTRY:-https://registry.npmjs.org}"
     local registry_host
-    registry_host=$(echo "$registry" | sed 's|https:||')
+    registry_host=$(echo "$registry" | sed 's|https:||' | sed 's|/$||')
 
-    echo "${registry_host}:_authToken=${INPUT_NPM_TOKEN}" > .npmrc
+    echo "${registry_host}/:_authToken=${INPUT_NPM_TOKEN}" > .npmrc
     echo "registry=${registry}" >> .npmrc
 
     npm publish
