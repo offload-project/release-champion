@@ -32,7 +32,7 @@ get_last_tag() {
 # Reads commit messages from stdin, one per line
 # Returns: major, minor, or patch
 determine_bump() {
-  local bump="patch"
+  local bump="none"
 
   while IFS= read -r message; do
     # Check for breaking changes
@@ -44,6 +44,13 @@ determine_bump() {
     # Check for features
     if [[ "$message" =~ ^feat(\(.+\))?: ]]; then
       bump="minor"
+    fi
+
+    # Check for patch-level changes
+    if [[ "$bump" == "none" ]]; then
+      if [[ "$message" =~ ^(fix|chore|docs|refactor|perf|style|build|revert)(\(.+\))?: ]]; then
+        bump="patch"
+      fi
     fi
   done
 
