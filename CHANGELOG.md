@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.3.0 - 2026-04-01
+
+### Added
+- Make release label optional ([5451258](https://github.com/offload-project/release-champion/commit/54512585ed7fc2e05e3bf9d7a20d86429d5bc9f0))
+
 ## v1.2.1 - 2026-04-01
 
 ### Fixed
