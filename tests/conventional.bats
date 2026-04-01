@@ -64,9 +64,19 @@ setup() {
   [[ "$result" == "major" ]]
 }
 
-@test "determine_bump: patch for non-conventional commits" {
+@test "determine_bump: none for non-conventional commits" {
   result=$(echo "update readme" | determine_bump)
-  [[ "$result" == "patch" ]]
+  [[ "$result" == "none" ]]
+}
+
+@test "determine_bump: none for ci commits" {
+  result=$(echo "ci: update pipeline" | determine_bump)
+  [[ "$result" == "none" ]]
+}
+
+@test "determine_bump: none for test commits" {
+  result=$(echo "test: add unit tests" | determine_bump)
+  [[ "$result" == "none" ]]
 }
 
 @test "determine_bump: patch for chore commits" {

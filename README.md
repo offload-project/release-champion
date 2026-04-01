@@ -10,7 +10,9 @@ handles the rest — version bumps, changelogs, tags, and GitHub releases. Optio
 2. Merge a PR — the action creates a release PR with the version bump and changelog
 3. Review and merge the release PR — the action creates the tag and GitHub release
 
-By default, every merged PR triggers a release. If you'd rather control when releases happen, set `require-release-label: true` and add the configured label (default: `change-release`) to PRs that should trigger a release.
+By default, every merged PR triggers a release. If you'd rather control when releases happen, set
+`require-release-label: true` and add the configured label (default: `change-release`) to PRs that should trigger a
+release.
 
 ## How it works
 
@@ -45,7 +47,7 @@ name: Release
 on:
   pull_request:
     types: [ closed ]
-    
+
 permissions:
   contents: write
   pull-requests: write
@@ -68,19 +70,19 @@ jobs:
 
 ## Inputs
 
-| Input                   | Description                                                                                      | Required | Default          |
-|-------------------------|--------------------------------------------------------------------------------------------------|----------|------------------|
-| `github-token`          | GitHub token for creating PRs, tags, and releases                                                | Yes      | —                |
-| `release-label`         | Label that marks a PR for release (only used when `require-release-label` is `true`)             | No       | `change-release` |
-| `require-release-label` | Require the release label to trigger a release PR. When `false`, every merged PR triggers a release | No       | `false`          |
-| `version-prefix`        | Prefix for version tags (e.g., `v` produces `v1.2.3`)                                           | No       | `v`              |
-| `create-tag`            | Create a git tag when the release PR is merged                                                   | No       | `true`           |
-| `create-release`        | Create a GitHub release when the release PR is merged                                            | No       | `true`           |
-| `draft-release`         | Create the GitHub release as a draft (unpublished)                                               | No       | `true`           |
-| `changelog`             | Generate or update `CHANGELOG.md` in the release PR                                              | No       | `true`           |
-| `publish-npm`           | Publish the package to an npm registry when the release PR is merged                             | No       | `false`          |
-| `npm-token`             | Auth token for the npm registry (required when `publish-npm` is `true`)                          | No       | —                |
-| `npm-registry`          | npm registry URL (set to `https://npm.pkg.github.com` for GitHub Packages)                       | No       | `https://registry.npmjs.org` |
+| Input                   | Description                                                                                         | Required | Default                      |
+|-------------------------|-----------------------------------------------------------------------------------------------------|----------|------------------------------|
+| `github-token`          | GitHub token for creating PRs, tags, and releases                                                   | Yes      | —                            |
+| `release-label`         | Label that marks a PR for release (only used when `require-release-label` is `true`)                | No       | `change-release`             |
+| `require-release-label` | Require the release label to trigger a release PR. When `false`, every merged PR triggers a release | No       | `false`                      |
+| `version-prefix`        | Prefix for version tags (e.g., `v` produces `v1.2.3`)                                               | No       | `v`                          |
+| `create-tag`            | Create a git tag when the release PR is merged                                                      | No       | `true`                       |
+| `create-release`        | Create a GitHub release when the release PR is merged                                               | No       | `true`                       |
+| `draft-release`         | Create the GitHub release as a draft (unpublished)                                                  | No       | `true`                       |
+| `changelog`             | Generate or update `CHANGELOG.md` in the release PR                                                 | No       | `true`                       |
+| `publish-npm`           | Publish the package to an npm registry when the release PR is merged                                | No       | `false`                      |
+| `npm-token`             | Auth token for the npm registry (required when `publish-npm` is `true`)                             | No       | —                            |
+| `npm-registry`          | npm registry URL (set to `https://npm.pkg.github.com` for GitHub Packages)                          | No       | `https://registry.npmjs.org` |
 
 ## Outputs
 
@@ -216,7 +218,9 @@ steps:
 
 ## Permissions
 
-The workflow needs `contents: write` (for tags and releases) and `pull-requests: write` (for creating PRs). If publishing to GitHub Packages, also add `packages: write`. If using the default `GITHUB_TOKEN`, set these under the job's `permissions` key.
+The workflow needs `contents: write` (for tags and releases) and `pull-requests: write` (for creating PRs). If
+publishing to GitHub Packages, also add `packages: write`. If using the default `GITHUB_TOKEN`, set these under the
+job's `permissions` key.
 
 ## Tests
 

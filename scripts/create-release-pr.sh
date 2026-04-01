@@ -39,6 +39,12 @@ main() {
   bump=$(echo "$commits" | while IFS= read -r line; do echo "${line#* }"; done | determine_bump)
   echo "Bump type: ${bump}"
 
+  if [[ "$bump" == "none" ]]; then
+    echo "::warning::No releasable commits found (ci, test, etc. do not trigger a release). Skipping."
+    echo "::endgroup::"
+    return 0
+  fi
+
   # Calculate new version
   local new_version
   new_version=$(next_version "$last_tag" "$bump")
