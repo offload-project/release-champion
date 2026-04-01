@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.2.1 - 2026-04-01
+
+### Fixed
+- Move workflow permissions to top [#7](https://github.com/offload-project/release-champion/pull/7)
+
 ## v1.2.0 - 2026-03-31
 
 ### Added
