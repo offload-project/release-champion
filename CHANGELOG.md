@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.4.2 - 2026-04-01
+
+### Fixed
+- Determine_bump return none instead of defaulting to patch when n… [#15](https://github.com/offload-project/release-champion/pull/15)
+
 ## v1.4.1 - 2026-04-01
 
 ### Other
