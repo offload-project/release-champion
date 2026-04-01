@@ -46,14 +46,15 @@ name: Release
 on:
   pull_request:
     types: [ closed ]
+    
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   release:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
       - uses: actions/checkout@v6
         with:
