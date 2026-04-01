@@ -58,6 +58,37 @@ main() {
     echo "release_url=${release_url}" >> "$GITHUB_OUTPUT"
   fi
 
+  # Publish to npm
+  if [[ "${INPUT_PUBLISH_NPM:-false}" == "true" ]]; then
+    echo "::group::Publishing to npm"
+
+    if ! command -v npm &>/dev/null; then
+      echo "::error::npm is not installed. Add a setup-node step before release-champion."
+      exit 1
+    fi
+
+    if [[ -z "${INPUT_NPM_TOKEN:-}" ]]; then
+      echo "::error::npm-token is required when publish-npm is true"
+      exit 1
+    fi
+
+    local registry="${INPUT_NPM_REGISTRY:-https://registry.npmjs.org}"
+    local registry_host
+    registry_host=$(echo "$registry" | sed 's|https:||')
+
+    echo "${registry_host}:_authToken=${INPUT_NPM_TOKEN}" > .npmrc
+    echo "registry=${registry}" >> .npmrc
+
+    npm publish
+
+    rm -f .npmrc
+
+    local pkg_name
+    pkg_name=$(node -p "require('./package.json').name")
+    echo "Published ${pkg_name}@${version}"
+    echo "::endgroup::"
+  fi
+
   echo "version=${version}" >> "$GITHUB_OUTPUT"
 }
 

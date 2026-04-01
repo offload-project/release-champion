@@ -36,6 +36,17 @@ inputs:
     description: 'Generate or update CHANGELOG.md in the release PR'
     required: false
     default: 'true'
+  publish-npm:
+    description: 'Publish the package to an npm registry when the release PR is merged'
+    required: false
+    default: 'false'
+  npm-token:
+    description: 'Auth token for the npm registry (required when publish-npm is true)'
+    required: false
+  npm-registry:
+    description: 'npm registry URL (e.g., https://npm.pkg.github.com for GitHub Packages)'
+    required: false
+    default: 'https://registry.npmjs.org'
 
 outputs:
   version:
@@ -66,6 +77,9 @@ runs:
         INPUT_CREATE_RELEASE: ${{ inputs.create-release }}
         INPUT_DRAFT_RELEASE: ${{ inputs.draft-release }}
         INPUT_CHANGELOG: ${{ inputs.changelog }}
+        INPUT_PUBLISH_NPM: ${{ inputs.publish-npm }}
+        INPUT_NPM_TOKEN: ${{ inputs.npm-token }}
+        INPUT_NPM_REGISTRY: ${{ inputs.npm-registry }}
         PR_NUMBER: ${{ github.event.pull_request.number }}
         PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
         PR_MERGED: ${{ github.event.pull_request.merged }}

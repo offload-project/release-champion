@@ -24,8 +24,9 @@ When a PR is merged (and the release label requirement is met, if enabled):
 2. Analyzes all commits since that tag using conventional commit prefixes
 3. Determines the appropriate semver bump (major, minor, or patch)
 4. Creates a `release/<prefix><version>` branch
-5. Optionally generates/updates `CHANGELOG.md`
-6. Opens a release PR with a summary of what's included
+5. Bumps `package.json` version if npm publishing is enabled
+6. Optionally generates/updates `CHANGELOG.md`
+7. Opens a release PR with a summary of what's included
 
 ### Phase 2: Finalize the release
 
@@ -33,6 +34,7 @@ When the release PR (detected by the `release/` branch prefix) is merged:
 
 1. Creates an annotated git tag
 2. Optionally creates a GitHub release with auto-generated release notes
+3. Optionally publishes to an npm registry
 
 ## Usage
 
@@ -76,6 +78,9 @@ jobs:
 | `create-release`        | Create a GitHub release when the release PR is merged                                            | No       | `true`           |
 | `draft-release`         | Create the GitHub release as a draft (unpublished)                                               | No       | `true`           |
 | `changelog`             | Generate or update `CHANGELOG.md` in the release PR                                              | No       | `true`           |
+| `publish-npm`           | Publish the package to an npm registry when the release PR is merged                             | No       | `false`          |
+| `npm-token`             | Auth token for the npm registry (required when `publish-npm` is `true`)                          | No       | —                |
+| `npm-registry`          | npm registry URL (set to `https://npm.pkg.github.com` for GitHub Packages)                       | No       | `https://registry.npmjs.org` |
 
 ## Outputs
 
@@ -163,6 +168,27 @@ Commits that can't be linked to a PR will reference the commit SHA instead.
     version-prefix: ''
 ```
 
+### Publish to npm
+
+```yaml
+- uses: offload-project/release-champion@v1
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+    publish-npm: true
+    npm-token: ${{ secrets.NPM_TOKEN }}
+```
+
+### Publish to GitHub Packages
+
+```yaml
+- uses: offload-project/release-champion@v1
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+    publish-npm: true
+    npm-token: ${{ secrets.GITHUB_TOKEN }}
+    npm-registry: 'https://npm.pkg.github.com'
+```
+
 ### Tag only, no GitHub release
 
 ```yaml
@@ -190,8 +216,7 @@ steps:
 
 ## Permissions
 
-The workflow needs `contents: write` (for tags and releases) and `pull-requests: write` (for creating PRs). If using the
-default `GITHUB_TOKEN`, set these under the job's `permissions` key.
+The workflow needs `contents: write` (for tags and releases) and `pull-requests: write` (for creating PRs). If publishing to GitHub Packages, also add `packages: write`. If using the default `GITHUB_TOKEN`, set these under the job's `permissions` key.
 
 ## Tests
 
