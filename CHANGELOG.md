@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.4.3 - 2026-04-01
+
+### Fixed
+- Write npmrc for npm pub ([bdf21c0](https://github.com/offload-project/release-champion/commit/bdf21c095f61fde85e7410af14a8111f5ede3631))
+
 ## v1.4.2 - 2026-04-01
 
 ### Fixed
