@@ -1,19 +1,16 @@
 # Release Champion
 
 A GitHub Action that automates semantic versioning and releases
-using <a href="https://www.conventionalcommits.org/">conventional commits</a>. Label a PR, merge it, and the action
-handles the
-rest — version bumps, changelogs, tags, and GitHub releases.
+using <a href="https://www.conventionalcommits.org/">conventional commits</a>. Merge a PR and the action
+handles the rest — version bumps, changelogs, tags, and GitHub releases. Optionally gate releases behind a label.
 
 ## Quick start
 
 1. Add the workflow to your repo (see [Usage](#usage) below)
-2. Create a label called `change-release` in your repo (or configure a custom label via the `release-label` input)
-3. When you're ready to release, add the `change-release` label to a PR
-4. Merge the PR — the action creates a release PR with the version bump and changelog
-5. Review and merge the release PR — the action creates the tag and GitHub release
+2. Merge a PR — the action creates a release PR with the version bump and changelog
+3. Review and merge the release PR — the action creates the tag and GitHub release
 
-That's it. The label is what tells the action "this merge should trigger a release."
+By default, every merged PR triggers a release. If you'd rather control when releases happen, set `require-release-label: true` and add the configured label (default: `change-release`) to PRs that should trigger a release.
 
 ## How it works
 
@@ -21,7 +18,7 @@ The action operates in two phases, both triggered by `pull_request` `closed` eve
 
 ### Phase 1: Create a release PR
 
-When a PR with the release label (default: `change-release`) is merged:
+When a PR is merged (and the release label requirement is met, if enabled):
 
 1. Finds the latest version tag
 2. Analyzes all commits since that tag using conventional commit prefixes
@@ -69,15 +66,16 @@ jobs:
 
 ## Inputs
 
-| Input            | Description                                           | Required | Default          |
-|------------------|-------------------------------------------------------|----------|------------------|
-| `github-token`   | GitHub token for creating PRs, tags, and releases     | Yes      | —                |
-| `release-label`  | Label that marks a PR for release                     | No       | `change-release` |
-| `version-prefix` | Prefix for version tags (e.g., `v` produces `v1.2.3`) | No       | `v`              |
-| `create-tag`     | Create a git tag when the release PR is merged        | No       | `true`           |
-| `create-release` | Create a GitHub release when the release PR is merged | No       | `true`           |
-| `draft-release`  | Create the GitHub release as a draft (unpublished)    | No       | `true`           |
-| `changelog`      | Generate or update `CHANGELOG.md` in the release PR   | No       | `true`           |
+| Input                   | Description                                                                                      | Required | Default          |
+|-------------------------|--------------------------------------------------------------------------------------------------|----------|------------------|
+| `github-token`          | GitHub token for creating PRs, tags, and releases                                                | Yes      | —                |
+| `release-label`         | Label that marks a PR for release (only used when `require-release-label` is `true`)             | No       | `change-release` |
+| `require-release-label` | Require the release label to trigger a release PR. When `false`, every merged PR triggers a release | No       | `false`          |
+| `version-prefix`        | Prefix for version tags (e.g., `v` produces `v1.2.3`)                                           | No       | `v`              |
+| `create-tag`            | Create a git tag when the release PR is merged                                                   | No       | `true`           |
+| `create-release`        | Create a GitHub release when the release PR is merged                                            | No       | `true`           |
+| `draft-release`         | Create the GitHub release as a draft (unpublished)                                               | No       | `true`           |
+| `changelog`             | Generate or update `CHANGELOG.md` in the release PR                                              | No       | `true`           |
 
 ## Outputs
 
@@ -145,12 +143,22 @@ Commits that can't be linked to a PR will reference the commit SHA instead.
     changelog: false
 ```
 
+### Require a label to release
+
+```yaml
+- uses: offload-project/release-champion@v1
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+    require-release-label: true
+```
+
 ### Custom label and no version prefix
 
 ```yaml
 - uses: offload-project/release-champion@v1
   with:
     github-token: ${{ secrets.GITHUB_TOKEN }}
+    require-release-label: true
     release-label: 'ready-to-release'
     version-prefix: ''
 ```

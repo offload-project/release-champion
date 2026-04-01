@@ -17,6 +17,11 @@ if [[ "$PR_HEAD_REF" == release/* ]]; then
   echo "Detected release PR merge (branch: ${PR_HEAD_REF})"
   bash "$SCRIPT_DIR/finalize-release.sh"
 
+elif [[ "${INPUT_REQUIRE_RELEASE_LABEL:-false}" != "true" ]]; then
+  # Phase 1: Label not required — every merged PR triggers a release
+  echo "Release label not required — creating release PR"
+  bash "$SCRIPT_DIR/create-release-pr.sh"
+
 elif echo "$PR_LABELS" | tr ',' '\n' | grep -qx "$INPUT_RELEASE_LABEL"; then
   # Phase 1: Labeled PR was merged → create release PR
   echo "Detected labeled PR merge (label: ${INPUT_RELEASE_LABEL})"
