@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.5.0 - 2026-04-02
+
+### Added
+- Npm build command input ([dabcc4a](https://github.com/offload-project/release-champion/commit/dabcc4ad15bda76d29ac9275f0cb0dcb4a9fd2d9))
+
 ## v1.4.3 - 2026-04-01
 
 ### Fixed
