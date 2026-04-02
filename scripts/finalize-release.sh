@@ -79,6 +79,12 @@ main() {
     echo "${registry_host}/:_authToken=${INPUT_NPM_TOKEN}" > .npmrc
     echo "registry=${registry}" >> .npmrc
 
+    if [[ -n "${INPUT_NPM_BUILD_COMMAND:-}" ]]; then
+      echo "Running build: ${INPUT_NPM_BUILD_COMMAND}"
+      npm install
+      eval "$INPUT_NPM_BUILD_COMMAND"
+    fi
+
     npm publish
 
     rm -f .npmrc

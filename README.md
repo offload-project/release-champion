@@ -83,6 +83,7 @@ jobs:
 | `publish-npm`           | Publish the package to an npm registry when the release PR is merged                                | No       | `false`                      |
 | `npm-token`             | Auth token for the npm registry (required when `publish-npm` is `true`)                             | No       | —                            |
 | `npm-registry`          | npm registry URL (set to `https://npm.pkg.github.com` for GitHub Packages)                          | No       | `https://registry.npmjs.org` |
+| `npm-build-command`     | Build command to run before `npm publish` (e.g., `npm run build`)                                   | No       | —                            |
 
 ## Outputs
 
@@ -178,6 +179,7 @@ Commits that can't be linked to a PR will reference the commit SHA instead.
     github-token: ${{ secrets.GITHUB_TOKEN }}
     publish-npm: true
     npm-token: ${{ secrets.NPM_TOKEN }}
+    npm-build-command: 'npm run build'
 ```
 
 ### Publish to GitHub Packages
@@ -189,6 +191,7 @@ Commits that can't be linked to a PR will reference the commit SHA instead.
     publish-npm: true
     npm-token: ${{ secrets.GITHUB_TOKEN }}
     npm-registry: 'https://npm.pkg.github.com'
+    npm-build-command: 'npm run build'
 ```
 
 ### Tag only, no GitHub release
