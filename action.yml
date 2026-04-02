@@ -47,6 +47,9 @@ inputs:
     description: 'npm registry URL (e.g., https://npm.pkg.github.com for GitHub Packages)'
     required: false
     default: 'https://registry.npmjs.org'
+  npm-build-command:
+    description: 'Build command to run before npm publish (e.g., npm run build)'
+    required: false
 
 outputs:
   version:
@@ -80,6 +83,7 @@ runs:
         INPUT_PUBLISH_NPM: ${{ inputs.publish-npm }}
         INPUT_NPM_TOKEN: ${{ inputs.npm-token }}
         INPUT_NPM_REGISTRY: ${{ inputs.npm-registry }}
+        INPUT_NPM_BUILD_COMMAND: ${{ inputs.npm-build-command }}
         PR_NUMBER: ${{ github.event.pull_request.number }}
         PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
         PR_MERGED: ${{ github.event.pull_request.merged }}
