@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.6.0 - 2026-04-03
+
+### Added
+- One commit for release update [#21](https://github.com/offload-project/release-champion/pull/21)
+
 ## v1.5.0 - 2026-04-02
 
 ### Added
