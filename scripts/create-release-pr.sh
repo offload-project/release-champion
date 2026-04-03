@@ -72,7 +72,6 @@ main() {
     if [[ -f package-lock.json ]] && ! git diff --staged --quiet package-lock.json 2>/dev/null; then
       git add package-lock.json
     fi
-    git commit -m "chore: bump package version to ${new_version}"
   fi
 
   # Generate changelog if enabled
@@ -80,7 +79,11 @@ main() {
     echo "Generating changelog..."
     update_changelog "$new_version" "$last_tag"
     git add CHANGELOG.md
-    git commit -m "chore: update changelog for ${INPUT_VERSION_PREFIX}${new_version}"
+  fi
+
+  # Commit all release changes together
+  if ! git diff --staged --quiet 2>/dev/null; then
+    git commit -m "chore: release ${INPUT_VERSION_PREFIX}${new_version}"
   fi
 
   # Push the branch
