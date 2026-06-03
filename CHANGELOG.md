@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.6.1 - 2026-06-03
+
+### Fixed
+- Broken pipeline error [#23](https://github.com/offload-project/release-champion/pull/23)
+
 ## v1.6.0 - 2026-04-03
 
 ### Added
