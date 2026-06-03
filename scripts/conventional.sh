@@ -35,10 +35,16 @@ determine_bump() {
   local bump="none"
 
   while IFS= read -r message; do
-    # Check for breaking changes
+    # Check for breaking changes — major wins; finish consuming stdin so the
+    # upstream pipeline doesn't get EPIPE on its remaining writes.
     if [[ "$message" =~ ^[a-zA-Z]+(\(.+\))?!: ]] || [[ "$message" =~ BREAKING[[:space:]]CHANGE ]]; then
-      echo "major"
-      return
+      bump="major"
+      continue
+    fi
+
+    # Skip further checks once we've locked in major.
+    if [[ "$bump" == "major" ]]; then
+      continue
     fi
 
     # Check for features
