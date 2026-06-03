@@ -64,6 +64,19 @@ setup() {
   [[ "$result" == "major" ]]
 }
 
+@test "determine_bump: consumes the full stream after locking in major (no SIGPIPE)" {
+  # Producer pipeline that mirrors create-release-pr.sh — many lines piped in,
+  # with the breaking change up front. If determine_bump returns early, the
+  # remaining echos hit a closed pipe and emit "Broken pipe" on stderr.
+  err=$(
+    {
+      echo "feat!: break stuff"
+      for i in $(seq 1 50); do echo "fix: thing ${i}"; done
+    } | determine_bump 2>&1 >/dev/null
+  )
+  [[ -z "$err" ]]
+}
+
 @test "determine_bump: none for non-conventional commits" {
   result=$(echo "update readme" | determine_bump)
   [[ "$result" == "none" ]]
