@@ -41,7 +41,7 @@ inputs:
     required: false
     default: 'false'
   npm-token:
-    description: 'Auth token for the npm registry (required when publish-npm is true)'
+    description: 'Auth token for the npm registry. Omit to use npm Trusted Publishers (OIDC) — requires id-token:write permission and npm >= 11.5.1.'
     required: false
   npm-registry:
     description: 'npm registry URL (e.g., https://npm.pkg.github.com for GitHub Packages)'

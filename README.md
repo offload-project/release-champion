@@ -70,20 +70,20 @@ jobs:
 
 ## Inputs
 
-| Input                   | Description                                                                                         | Required | Default                      |
-|-------------------------|-----------------------------------------------------------------------------------------------------|----------|------------------------------|
-| `github-token`          | GitHub token for creating PRs, tags, and releases                                                   | Yes      | —                            |
-| `release-label`         | Label that marks a PR for release (only used when `require-release-label` is `true`)                | No       | `change-release`             |
-| `require-release-label` | Require the release label to trigger a release PR. When `false`, every merged PR triggers a release | No       | `false`                      |
-| `version-prefix`        | Prefix for version tags (e.g., `v` produces `v1.2.3`)                                               | No       | `v`                          |
-| `create-tag`            | Create a git tag when the release PR is merged                                                      | No       | `true`                       |
-| `create-release`        | Create a GitHub release when the release PR is merged                                               | No       | `true`                       |
-| `draft-release`         | Create the GitHub release as a draft (unpublished)                                                  | No       | `true`                       |
-| `changelog`             | Generate or update `CHANGELOG.md` in the release PR                                                 | No       | `true`                       |
-| `publish-npm`           | Publish the package to an npm registry when the release PR is merged                                | No       | `false`                      |
-| `npm-token`             | Auth token for the npm registry (required when `publish-npm` is `true`)                             | No       | —                            |
-| `npm-registry`          | npm registry URL (set to `https://npm.pkg.github.com` for GitHub Packages)                          | No       | `https://registry.npmjs.org` |
-| `npm-build-command`     | Build command to run before `npm publish` (e.g., `npm run build`)                                   | No       | —                            |
+| Input                   | Description                                                                                                       | Required | Default                      |
+|-------------------------|-------------------------------------------------------------------------------------------------------------------|----------|------------------------------|
+| `github-token`          | GitHub token for creating PRs, tags, and releases                                                                 | Yes      | —                            |
+| `release-label`         | Label that marks a PR for release (only used when `require-release-label` is `true`)                              | No       | `change-release`             |
+| `require-release-label` | Require the release label to trigger a release PR. When `false`, every merged PR triggers a release               | No       | `false`                      |
+| `version-prefix`        | Prefix for version tags (e.g., `v` produces `v1.2.3`)                                                             | No       | `v`                          |
+| `create-tag`            | Create a git tag when the release PR is merged                                                                    | No       | `true`                       |
+| `create-release`        | Create a GitHub release when the release PR is merged                                                             | No       | `true`                       |
+| `draft-release`         | Create the GitHub release as a draft (unpublished)                                                                | No       | `true`                       |
+| `changelog`             | Generate or update `CHANGELOG.md` in the release PR                                                               | No       | `true`                       |
+| `publish-npm`           | Publish the package to an npm registry when the release PR is merged                                              | No       | `false`                      |
+| `npm-token`             | Auth token for the npm registry. Omit to use [Trusted Publishers](#publish-to-npm-with-trusted-publishers) (OIDC) | No       | —                            |
+| `npm-registry`          | npm registry URL (set to `https://npm.pkg.github.com` for GitHub Packages)                                        | No       | `https://registry.npmjs.org` |
+| `npm-build-command`     | Build command to run before `npm publish` (e.g., `npm run build`)                                                 | No       | —                            |
 
 ## Outputs
 
@@ -180,6 +180,57 @@ Commits that can't be linked to a PR will reference the commit SHA instead.
     publish-npm: true
     npm-token: ${{ secrets.NPM_TOKEN }}
     npm-build-command: 'npm run build'
+```
+
+### Publish to npm with Trusted Publishers
+
+[npm Trusted Publishers](https://docs.npmjs.com/trusted-publishers) lets you publish without a long-lived token. npm
+exchanges a GitHub OIDC token at publish time and attaches a provenance attestation automatically.
+
+**Setup:**
+
+1. On npmjs.com, open your package's settings → **Publishing access** and add a trusted publisher. Match the repo
+   (`owner/repo`), the workflow filename (e.g., `release.yml`), and the environment if you use one. The values must
+   match exactly — a mismatch will reject the publish.
+2. Use Node 24+ in your workflow. Trusted Publishers requires npm ≥ 11.5.1; Node 24 ships it by default, older Node
+   versions don't.
+3. Add `id-token: write` to the workflow's `permissions`.
+4. Omit `npm-token`. If a token is set, the action falls back to token auth and skips OIDC.
+
+> **First publish:** Trusted Publishers can only be configured on a package that already exists on npm. For a brand-new
+> package, do the initial publish manually (or with a token) so the package exists, then set up the trusted publisher
+> and remove the token.
+
+```yaml
+name: Release
+
+on:
+  pull_request:
+    types: [ closed ]
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write           # required for Trusted Publishers
+
+jobs:
+  release:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+      - uses: offload-project/release-champion@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          publish-npm: true
+          npm-build-command: 'npm run build'
 ```
 
 ### Publish to GitHub Packages
