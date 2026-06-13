@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.7.0 - 2026-06-13
+
+### Added
+- Support npm trusted publisher publishing [#25](https://github.com/offload-project/release-champion/pull/25)
+
 ## v1.6.1 - 2026-06-03
 
 ### Fixed
