@@ -67,17 +67,19 @@ main() {
       exit 1
     fi
 
-    if [[ -z "${INPUT_NPM_TOKEN:-}" ]]; then
-      echo "::error::npm-token is required when publish-npm is true"
-      exit 1
-    fi
-
     local registry="${INPUT_NPM_REGISTRY:-https://registry.npmjs.org}"
     local registry_host
     registry_host=$(echo "$registry" | sed 's|https:||' | sed 's|/$||')
 
-    echo "${registry_host}/:_authToken=${INPUT_NPM_TOKEN}" > .npmrc
-    echo "registry=${registry}" >> .npmrc
+    if [[ -n "${INPUT_NPM_TOKEN:-}" ]]; then
+      echo "${registry_host}/:_authToken=${INPUT_NPM_TOKEN}" > .npmrc
+      echo "registry=${registry}" >> .npmrc
+    else
+      # No token: rely on npm Trusted Publishers (OIDC).
+      # Requires npm >= 11.5.1 and `id-token: write` workflow permission.
+      echo "registry=${registry}" > .npmrc
+      echo "No npm-token provided — using Trusted Publishers (OIDC)"
+    fi
 
     if [[ -n "${INPUT_NPM_BUILD_COMMAND:-}" ]]; then
       echo "Running build: ${INPUT_NPM_BUILD_COMMAND}"
