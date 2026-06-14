@@ -1,8 +1,42 @@
 # Release Champion
 
+[![GitHub Release](https://img.shields.io/github/v/release/offload-project/release-champion?style=flat-square)](https://github.com/offload-project/release-champion/releases)
+[![Build](https://img.shields.io/github/actions/workflow/status/offload-project/release-champion/release.yml?label=build&style=flat-square)](https://github.com/offload-project/release-champion/actions/workflows/release.yml)
+[![Marketplace](https://img.shields.io/badge/marketplace-release--champion-blue?style=flat-square&logo=github)](https://github.com/marketplace/actions/release-champion)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE.md)
+
 A GitHub Action that automates semantic versioning and releases
-using <a href="https://www.conventionalcommits.org/">conventional commits</a>. Merge a PR and the action
-handles the rest — version bumps, changelogs, tags, and GitHub releases. Optionally gate releases behind a label.
+using [conventional commits](https://www.conventionalcommits.org/). Merge a PR and the action handles the rest — version
+bumps, changelogs, tags, and GitHub releases. Optionally gate releases behind a label.
+
+## Features
+
+- **Two-phase release flow** — opens a release PR first; tags and releases only after that PR is merged
+- **Conventional commits** — automatic semver bumps (major/minor/patch) from commit prefixes
+- **Changelog generation** — `CHANGELOG.md` grouped by change type with links to the originating PRs
+- **Optional release gating** — require a label on a PR before it triggers a release
+- **GitHub releases** — auto-generated release notes, draft or published
+- **npm publishing** — token-based or [npm Trusted Publishers](https://docs.npmjs.com/trusted-publishers) (OIDC)
+- **GitHub Packages support** — point at any npm-compatible registry
+- **Composite action** — runs as bash on the consumer's runner, no Docker pull
+
+## Table of Contents
+
+- [Quick start](#quick-start)
+- [How it works](#how-it-works)
+    - [Phase 1: Create a release PR](#phase-1-create-a-release-pr)
+    - [Phase 2: Finalize the release](#phase-2-finalize-the-release)
+- [Usage](#usage)
+- [Inputs](#inputs)
+- [Outputs](#outputs)
+- [Conventional commits and version bumps](#conventional-commits-and-version-bumps)
+- [Changelog format](#changelog-format)
+- [Examples](#examples)
+- [Permissions](#permissions)
+- [Tests](#tests)
+- [Contributing](#contributing)
+- [Security](#security)
+- [License](#license)
 
 ## Quick start
 
@@ -282,6 +316,17 @@ job's `permissions` key.
 bats tests/conventional.bats
 ```
 
+## Contributing
+
+Contributions are welcome! Please see the documents below before getting started.
+
+- [Contributing Guide](CONTRIBUTING.md) — setup, workflow, commit conventions, and PR process
+- [Code of Conduct](CODE_OF_CONDUCT.md) — expectations for participation in this project
+
+## Security
+
+- [Security Policy](SECURITY.md) — how to report a vulnerability privately
+
 ## License
 
-MIT
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
