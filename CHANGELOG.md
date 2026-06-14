@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.7.1 - 2026-06-14
+
+### Documentation
+- Add missing, update README [#27](https://github.com/offload-project/release-champion/pull/27)
+
 ## v1.7.0 - 2026-06-13
 
 ### Added
