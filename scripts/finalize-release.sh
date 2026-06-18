@@ -5,6 +5,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/conventional.sh"
+source "$SCRIPT_DIR/workspaces.sh"
 
 main() {
   # Extract version from branch name (release/v1.2.3 → v1.2.3)
@@ -87,13 +88,40 @@ main() {
       eval "$INPUT_NPM_BUILD_COMMAND"
     fi
 
-    npm publish
+    # Build the list of package directories to publish. In fixed/locked
+    # workspaces mode this is the root plus every discovered workspace package;
+    # otherwise it is just the root.
+    local publish_dirs=(".")
+    if [[ "${INPUT_NPM_WORKSPACES:-false}" == "true" ]]; then
+      local pkg_dir
+      while IFS= read -r pkg_dir; do
+        [[ -n "$pkg_dir" ]] && publish_dirs+=("$pkg_dir")
+      done < <(discover_packages ".")
+    fi
+
+    # Publish each package from the repo root so the root .npmrc auth applies
+    # (npm only reads the project .npmrc from the current directory). Private
+    # packages are skipped; scoped names get --access public for first publish.
+    local dir
+    for dir in "${publish_dirs[@]}"; do
+      if is_private_package "$dir"; then
+        echo "Skipping ${dir} (private package)"
+        continue
+      fi
+
+      local publish_flags=("$dir")
+      if is_scoped_package "$dir"; then
+        publish_flags+=(--access public)
+      fi
+
+      npm publish "${publish_flags[@]}"
+
+      local pkg_name
+      pkg_name=$(node -e 'const fs=require("fs");console.log(JSON.parse(fs.readFileSync(process.argv[1],"utf8")).name)' "$dir/package.json")
+      echo "Published ${pkg_name}@${version}"
+    done
 
     rm -f .npmrc
-
-    local pkg_name
-    pkg_name=$(node -p "require('./package.json').name")
-    echo "Published ${pkg_name}@${version}"
     echo "::endgroup::"
   fi
 

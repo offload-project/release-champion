@@ -6,6 +6,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/conventional.sh"
 source "$SCRIPT_DIR/changelog.sh"
+source "$SCRIPT_DIR/workspaces.sh"
 
 main() {
   echo "::group::Analyzing commits for version bump"
@@ -66,9 +67,26 @@ main() {
       echo "::error::publish-npm is enabled but no package.json found"
       exit 1
     fi
-    echo "Bumping package.json to ${new_version}"
-    npm version "$new_version" --no-git-tag-version
-    git add package.json
+
+    # In fixed/locked mode every workspace package shares the new version. The
+    # root package.json is always bumped (it carries the workspaces field); each
+    # discovered workspace package is bumped to the same version.
+    local bump_dirs=(".")
+    if [[ "${INPUT_NPM_WORKSPACES:-false}" == "true" ]]; then
+      local pkg_dir
+      while IFS= read -r pkg_dir; do
+        [[ -n "$pkg_dir" ]] && bump_dirs+=("$pkg_dir")
+      done < <(discover_packages ".")
+      echo "Workspaces mode: bumping ${#bump_dirs[@]} package(s) to ${new_version}"
+    fi
+
+    local dir
+    for dir in "${bump_dirs[@]}"; do
+      echo "Bumping ${dir}/package.json to ${new_version}"
+      ( cd "$dir" && npm version "$new_version" --no-git-tag-version --allow-same-version )
+      git add "$dir/package.json"
+    done
+
     if [[ -f package-lock.json ]] && ! git diff --staged --quiet package-lock.json 2>/dev/null; then
       git add package-lock.json
     fi

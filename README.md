@@ -17,6 +17,7 @@ bumps, changelogs, tags, and GitHub releases. Optionally gate releases behind a 
 - **Optional release gating** — require a label on a PR before it triggers a release
 - **GitHub releases** — auto-generated release notes, draft or published
 - **npm publishing** — token-based or [npm Trusted Publishers](https://docs.npmjs.com/trusted-publishers) (OIDC)
+- **Monorepo support** — publish every npm-workspaces package together with fixed (locked) versioning
 - **GitHub Packages support** — point at any npm-compatible registry
 - **Composite action** — runs as bash on the consumer's runner, no Docker pull
 
@@ -118,6 +119,7 @@ jobs:
 | `npm-token`             | Auth token for the npm registry. Omit to use [Trusted Publishers](#publish-to-npm-with-trusted-publishers) (OIDC) | No       | —                            |
 | `npm-registry`          | npm registry URL (set to `https://npm.pkg.github.com` for GitHub Packages)                                        | No       | `https://registry.npmjs.org` |
 | `npm-build-command`     | Build command to run before `npm publish` (e.g., `npm run build`)                                                 | No       | —                            |
+| `npm-workspaces`        | Publish every npm workspace package (monorepo). All packages share one version — see [Publish a monorepo](#publish-a-monorepo-npm-workspaces) | No       | `false`                      |
 
 ## Outputs
 
@@ -278,6 +280,44 @@ jobs:
     npm-registry: 'https://npm.pkg.github.com'
     npm-build-command: 'npm run build'
 ```
+
+### Publish a monorepo (npm workspaces)
+
+Set `npm-workspaces: true` to publish every package in an npm-workspaces monorepo. Release Champion uses
+**fixed (locked) versioning**: it computes a single version from your conventional commits, then bumps and publishes
+**every** package to that same version. There is still one tag, one release PR, and one root `CHANGELOG.md`.
+
+```yaml
+- uses: offload-project/release-champion@v1
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+    publish-npm: true
+    npm-workspaces: true
+    npm-token: ${{ secrets.NPM_TOKEN }}
+    npm-build-command: 'npm run build'
+```
+
+Packages are discovered from the `workspaces` field in your root `package.json` (both the array and
+`{ "packages": [...] }` forms are supported):
+
+```json
+{
+  "name": "my-monorepo",
+  "private": true,
+  "workspaces": ["packages/*"]
+}
+```
+
+Behavior notes:
+
+- **One version for all.** A change to any package bumps and republishes every package — even packages that didn't
+  change. (If you need each package to version independently, that isn't supported yet.)
+- **Private packages are skipped.** Any package with `"private": true` is bumped but never published — so a private
+  root `package.json` that only declares `workspaces` is handled correctly.
+- **Scoped packages publish publicly.** Packages with a scoped name (`@scope/name`) are published with
+  `--access public` so first publishes don't fail. Restricted scoped packages aren't supported.
+- **Trusted Publishers per package.** OIDC publishing works, but each package must be registered as its own trusted
+  publisher on npm.
 
 ### Tag only, no GitHub release
 

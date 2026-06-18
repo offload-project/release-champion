@@ -50,6 +50,10 @@ inputs:
   npm-build-command:
     description: 'Build command to run before npm publish (e.g., npm run build)'
     required: false
+  npm-workspaces:
+    description: 'Publish every npm workspace package (monorepo, fixed/locked versioning). All packages share the single computed version. Discovered from the root package.json "workspaces" field.'
+    required: false
+    default: 'false'
 
 outputs:
   version:
@@ -84,6 +88,7 @@ runs:
         INPUT_NPM_TOKEN: ${{ inputs.npm-token }}
         INPUT_NPM_REGISTRY: ${{ inputs.npm-registry }}
         INPUT_NPM_BUILD_COMMAND: ${{ inputs.npm-build-command }}
+        INPUT_NPM_WORKSPACES: ${{ inputs.npm-workspaces }}
         PR_NUMBER: ${{ github.event.pull_request.number }}
         PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
         PR_MERGED: ${{ github.event.pull_request.merged }}
