@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.8.0 - 2026-06-21
+
+### Added
+- Monorepo publishing support [#29](https://github.com/offload-project/release-champion/pull/29)
+
 ## v1.7.1 - 2026-06-14
 
 ### Documentation
