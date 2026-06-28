@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.9.1 - 2026-06-28
+
+### Fixed
+- Missing npm token treated as trusted pub [#35](https://github.com/offload-project/release-champion/pull/35)
+
 ## v1.9.0 - 2026-06-28
 
 ### Added
