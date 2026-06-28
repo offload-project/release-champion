@@ -84,7 +84,13 @@ main() {
 
     if [[ -n "${INPUT_NPM_BUILD_COMMAND:-}" ]]; then
       echo "Running build: ${INPUT_NPM_BUILD_COMMAND}"
-      npm install
+      # Prefer `npm ci` for reproducible installs from the lockfile; fall back to
+      # `npm install` when the repo has no lockfile (ci requires one).
+      if [[ -f package-lock.json || -f npm-shrinkwrap.json ]]; then
+        npm ci
+      else
+        npm install
+      fi
       eval "$INPUT_NPM_BUILD_COMMAND"
     fi
 
