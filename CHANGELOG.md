@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.9.0 - 2026-06-28
+
+### Added
+- Detect npm package manager, cover ci install for each [#33](https://github.com/offload-project/release-champion/pull/33)
+
 ## v1.8.1 - 2026-06-28
 
 ### Fixed
