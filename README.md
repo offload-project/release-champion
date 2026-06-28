@@ -118,7 +118,7 @@ jobs:
 | `publish-npm`           | Publish the package to an npm registry when the release PR is merged                                              | No       | `false`                      |
 | `npm-token`             | Auth token for the npm registry. Omit to use [Trusted Publishers](#publish-to-npm-with-trusted-publishers) (OIDC) | No       | —                            |
 | `npm-registry`          | npm registry URL (set to `https://npm.pkg.github.com` for GitHub Packages)                                        | No       | `https://registry.npmjs.org` |
-| `npm-build-command`     | Build command to run before `npm publish` (e.g., `npm run build`)                                                 | No       | —                            |
+| `npm-build-command`     | Build command to run before `npm publish` (e.g., `npm run build`). Dependencies are installed first — see [Dependency install](#dependency-install) | No       | —                            |
 | `npm-workspaces`        | Publish every npm workspace package (monorepo). All packages share one version — see [Publish a monorepo](#publish-a-monorepo-npm-workspaces) | No       | `false`                      |
 
 ## Outputs
@@ -217,6 +217,24 @@ Commits that can't be linked to a PR will reference the commit SHA instead.
     npm-token: ${{ secrets.NPM_TOKEN }}
     npm-build-command: 'npm run build'
 ```
+
+#### Dependency install
+
+When `npm-build-command` is set, the action installs dependencies before running it. It picks the package manager
+from the lockfile in your repo and runs a frozen-lockfile install for reproducible builds:
+
+| Lockfile                                | Install command                   |
+|-----------------------------------------|-----------------------------------|
+| `package-lock.json` / `npm-shrinkwrap.json` | `npm ci`                      |
+| `yarn.lock`                             | `yarn install --frozen-lockfile`  |
+| `pnpm-lock.yaml`                        | `pnpm install --frozen-lockfile`  |
+| `bun.lock` / `bun.lockb`                | `bun install --frozen-lockfile`   |
+| _none_                                  | `npm install`                     |
+
+The detected package manager must be available on the runner — add its setup step (e.g.
+[`pnpm/action-setup`](https://github.com/pnpm/action-setup), [`oven-sh/setup-bun`](https://github.com/oven-sh/setup-bun))
+before release-champion. Note that publishing itself always uses `npm publish`, so `npm` must be on the runner
+regardless of which package manager builds the project.
 
 ### Publish to npm with Trusted Publishers
 

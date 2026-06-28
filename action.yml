@@ -48,7 +48,7 @@ inputs:
     required: false
     default: 'https://registry.npmjs.org'
   npm-build-command:
-    description: 'Build command to run before npm publish (e.g., npm run build)'
+    description: 'Build command to run before npm publish (e.g., npm run build). Dependencies are installed first with the package manager detected from the lockfile (npm, yarn, pnpm, or bun) using a frozen-lockfile install.'
     required: false
   npm-workspaces:
     description: 'Publish every npm workspace package (monorepo, fixed/locked versioning). All packages share the single computed version. Discovered from the root package.json "workspaces" field.'

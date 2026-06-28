@@ -6,6 +6,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/conventional.sh"
 source "$SCRIPT_DIR/workspaces.sh"
+source "$SCRIPT_DIR/install.sh"
 
 main() {
   # Extract version from branch name (release/v1.2.3 → v1.2.3)
@@ -83,14 +84,23 @@ main() {
     fi
 
     if [[ -n "${INPUT_NPM_BUILD_COMMAND:-}" ]]; then
-      echo "Running build: ${INPUT_NPM_BUILD_COMMAND}"
-      # Prefer `npm ci` for reproducible installs from the lockfile; fall back to
-      # `npm install` when the repo has no lockfile (ci requires one).
-      if [[ -f package-lock.json || -f npm-shrinkwrap.json ]]; then
-        npm ci
-      else
-        npm install
+      # Install dependencies with the repo's own package manager (detected from
+      # its lockfile) using a frozen-lockfile install for reproducibility, then
+      # run the user's build command.
+      local pm install_cmd pm_bin
+      pm=$(detect_package_manager ".")
+      install_cmd=$(install_command "$pm")
+      pm_bin="${install_cmd%% *}"
+
+      if ! command -v "$pm_bin" &>/dev/null; then
+        echo "::error::${pm_bin} is required to install dependencies (detected from the lockfile) but is not installed. Add a setup step for it before release-champion."
+        exit 1
       fi
+
+      echo "Installing dependencies: ${install_cmd}"
+      eval "$install_cmd"
+
+      echo "Running build: ${INPUT_NPM_BUILD_COMMAND}"
       eval "$INPUT_NPM_BUILD_COMMAND"
     fi
 
