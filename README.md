@@ -116,7 +116,7 @@ jobs:
 | `draft-release`         | Create the GitHub release as a draft (unpublished)                                                                | No       | `true`                       |
 | `changelog`             | Generate or update `CHANGELOG.md` in the release PR                                                               | No       | `true`                       |
 | `publish-npm`           | Publish the package to an npm registry when the release PR is merged                                              | No       | `false`                      |
-| `npm-token`             | Auth token for the npm registry. Omit to use [Trusted Publishers](#publish-to-npm-with-trusted-publishers) (OIDC) | No       | —                            |
+| `npm-token`             | Auth token for the npm registry. Omit to use OIDC or existing npm auth — see [Authentication](#authentication) | No       | —                            |
 | `npm-registry`          | npm registry URL (set to `https://npm.pkg.github.com` for GitHub Packages)                                        | No       | `https://registry.npmjs.org` |
 | `npm-build-command`     | Build command to run before `npm publish` (e.g., `npm run build`). Dependencies are installed first — see [Dependency install](#dependency-install) | No       | —                            |
 | `npm-workspaces`        | Publish every npm workspace package (monorepo). All packages share one version — see [Publish a monorepo](#publish-a-monorepo-npm-workspaces) | No       | `false`                      |
@@ -235,6 +235,38 @@ The detected package manager must be available on the runner — add its setup s
 [`pnpm/action-setup`](https://github.com/pnpm/action-setup), [`oven-sh/setup-bun`](https://github.com/oven-sh/setup-bun))
 before release-champion. Note that publishing itself always uses `npm publish`, so `npm` must be on the runner
 regardless of which package manager builds the project.
+
+#### Authentication
+
+The action chooses how to authenticate `npm publish` based on what you provide. A missing `npm-token` does **not**
+automatically mean Trusted Publishers — the action only uses OIDC when the workflow actually grants it:
+
+| Condition | Auth used | `.npmrc` behavior |
+|---|---|---|
+| `npm-token` is set | Token auth | Writes a temporary `.npmrc` with the token, removed after publish |
+| No `npm-token`, but the job has `id-token: write` | [Trusted Publishers (OIDC)](#publish-to-npm-with-trusted-publishers) | Writes a temporary `.npmrc` with just the registry, removed after publish |
+| No `npm-token` and no `id-token: write` | Existing npm auth (e.g. `actions/setup-node` + `NODE_AUTH_TOKEN`, or a pre-existing `~/.npmrc`) | Left untouched — the action neither writes nor deletes `.npmrc` |
+
+This means you can authenticate entirely through `actions/setup-node` and leave `npm-token` unset — the action won't
+clobber the `.npmrc` it manages. (OIDC is detected via the `ACTIONS_ID_TOKEN_REQUEST_URL` variable that GitHub sets
+only when `id-token: write` is granted.)
+
+##### GitHub Packages via `setup-node` (no `npm-token`)
+
+```yaml
+- uses: actions/setup-node@v4
+  with:
+    node-version: '24'
+    registry-url: 'https://npm.pkg.github.com'
+    scope: '@your-scope'
+- uses: offload-project/release-champion@v1
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+    publish-npm: true
+    npm-build-command: 'npm run build'
+  env:
+    NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
 
 ### Publish to npm with Trusted Publishers
 

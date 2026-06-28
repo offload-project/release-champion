@@ -41,7 +41,7 @@ inputs:
     required: false
     default: 'false'
   npm-token:
-    description: 'Auth token for the npm registry. Omit to use npm Trusted Publishers (OIDC) — requires id-token:write permission and npm >= 11.5.1.'
+    description: 'Auth token for the npm registry. If omitted and the workflow grants id-token:write, npm Trusted Publishers (OIDC) is used (requires npm >= 11.5.1). If omitted with no OIDC, the publish relies on existing npm auth (e.g. setup-node with NODE_AUTH_TOKEN) and the action will not write or overwrite .npmrc.'
     required: false
   npm-registry:
     description: 'npm registry URL (e.g., https://npm.pkg.github.com for GitHub Packages)'
