@@ -7,6 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/conventional.sh"
 source "$SCRIPT_DIR/workspaces.sh"
 source "$SCRIPT_DIR/install.sh"
+source "$SCRIPT_DIR/npm-auth.sh"
 
 main() {
   # Extract version from branch name (release/v1.2.3 → v1.2.3)
@@ -70,18 +71,16 @@ main() {
     fi
 
     local registry="${INPUT_NPM_REGISTRY:-https://registry.npmjs.org}"
-    local registry_host
-    registry_host=$(echo "$registry" | sed 's|https:||' | sed 's|/$||')
 
-    if [[ -n "${INPUT_NPM_TOKEN:-}" ]]; then
-      echo "${registry_host}/:_authToken=${INPUT_NPM_TOKEN}" > .npmrc
-      echo "registry=${registry}" >> .npmrc
-    else
-      # No token: rely on npm Trusted Publishers (OIDC).
-      # Requires npm >= 11.5.1 and `id-token: write` workflow permission.
-      echo "registry=${registry}" > .npmrc
-      echo "No npm-token provided — using Trusted Publishers (OIDC)"
-    fi
+    # Pick the auth mode and configure .npmrc accordingly (see npm-auth.sh).
+    local auth_mode wrote_npmrc
+    auth_mode=$(npm_auth_mode "${INPUT_NPM_TOKEN:-}" "${ACTIONS_ID_TOKEN_REQUEST_URL:-}")
+    case "$auth_mode" in
+      token)    echo "Authenticating with the provided npm-token" ;;
+      oidc)     echo "No npm-token provided — using Trusted Publishers (OIDC)" ;;
+      external) echo "No npm-token and no OIDC (id-token: write) detected — relying on existing npm auth (e.g. setup-node / NODE_AUTH_TOKEN)" ;;
+    esac
+    wrote_npmrc=$(write_npmrc "$auth_mode" "$registry" "${INPUT_NPM_TOKEN:-}" ".")
 
     if [[ -n "${INPUT_NPM_BUILD_COMMAND:-}" ]]; then
       # Install dependencies with the repo's own package manager (detected from
@@ -137,7 +136,11 @@ main() {
       echo "Published ${pkg_name}@${version}"
     done
 
-    rm -f .npmrc
+    # Only remove the .npmrc we created — never delete one written by a prior
+    # step (e.g. setup-node), which the publish above may have depended on.
+    if [[ "$wrote_npmrc" == "true" ]]; then
+      rm -f .npmrc
+    fi
     echo "::endgroup::"
   fi
 
