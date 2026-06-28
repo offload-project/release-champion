@@ -247,25 +247,69 @@ automatically mean Trusted Publishers — the action only uses OIDC when the wor
 | No `npm-token`, but the job has `id-token: write` | [Trusted Publishers (OIDC)](#publish-to-npm-with-trusted-publishers) | Writes a temporary `.npmrc` with just the registry, removed after publish |
 | No `npm-token` and no `id-token: write` | Existing npm auth (e.g. `actions/setup-node` + `NODE_AUTH_TOKEN`, or a pre-existing `~/.npmrc`) | Left untouched — the action neither writes nor deletes `.npmrc` |
 
-This means you can authenticate entirely through `actions/setup-node` and leave `npm-token` unset — the action won't
-clobber the `.npmrc` it manages. (OIDC is detected via the `ACTIONS_ID_TOKEN_REQUEST_URL` variable that GitHub sets
-only when `id-token: write` is granted.)
+OIDC is detected via the `ACTIONS_ID_TOKEN_REQUEST_URL` variable that GitHub sets only when `id-token: write` is
+granted.
 
-##### GitHub Packages via `setup-node` (no `npm-token`)
+> [!IMPORTANT]
+> **Composite-action env caveat.** release-champion is a [composite action](action.yml). Environment variables set with
+> `env:` **on the step that calls it are not propagated into the action** — only job-level and workflow-level `env` are.
+> So authenticating via `actions/setup-node` (which relies on `NODE_AUTH_TOKEN`) only works if you set `NODE_AUTH_TOKEN`
+> at the **job level**, not the step level. The simplest, most reliable approach is to pass `npm-token` and let the
+> action write `.npmrc` itself (see below).
+
+##### GitHub Packages (recommended: `npm-token`)
+
+Passing `npm-token` avoids the env-propagation caveat entirely — the action writes the `.npmrc` itself. GitHub Packages
+also requires `packages: write` permission:
 
 ```yaml
-- uses: actions/setup-node@v4
-  with:
-    node-version: '24'
-    registry-url: 'https://npm.pkg.github.com'
-    scope: '@your-scope'
-- uses: offload-project/release-champion@v1
-  with:
-    github-token: ${{ secrets.GITHUB_TOKEN }}
-    publish-npm: true
-    npm-build-command: 'npm run build'
-  env:
-    NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      packages: write          # required to publish to GitHub Packages
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: offload-project/release-champion@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          publish-npm: true
+          npm-token: ${{ secrets.GITHUB_TOKEN }}
+          npm-registry: 'https://npm.pkg.github.com'
+          npm-build-command: 'npm run build'
+```
+
+##### GitHub Packages via `setup-node` (job-level `NODE_AUTH_TOKEN`)
+
+If you prefer setup-node to manage auth, set `NODE_AUTH_TOKEN` at the **job level** so the composite action inherits it:
+
+```yaml
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}    # job level — NOT on the step
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@your-scope'
+      - uses: offload-project/release-champion@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          publish-npm: true
+          npm-build-command: 'npm run build'
 ```
 
 ### Publish to npm with Trusted Publishers
@@ -321,15 +365,8 @@ jobs:
 
 ### Publish to GitHub Packages
 
-```yaml
-- uses: offload-project/release-champion@v1
-  with:
-    github-token: ${{ secrets.GITHUB_TOKEN }}
-    publish-npm: true
-    npm-token: ${{ secrets.GITHUB_TOKEN }}
-    npm-registry: 'https://npm.pkg.github.com'
-    npm-build-command: 'npm run build'
-```
+See [Authentication → GitHub Packages](#github-packages-recommended-npm-token) for complete, copy-pasteable workflows
+(including the required `packages: write` permission and the composite-action env caveat).
 
 ### Publish a monorepo (npm workspaces)
 
