@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.8.1 - 2026-06-28
+
+### Fixed
+- Use npm ci install command [#31](https://github.com/offload-project/release-champion/pull/31)
+
 ## v1.8.0 - 2026-06-21
 
 ### Added
