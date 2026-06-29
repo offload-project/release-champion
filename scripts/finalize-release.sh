@@ -8,6 +8,7 @@ source "$SCRIPT_DIR/conventional.sh"
 source "$SCRIPT_DIR/workspaces.sh"
 source "$SCRIPT_DIR/install.sh"
 source "$SCRIPT_DIR/npm-auth.sh"
+source "$SCRIPT_DIR/tag.sh"
 
 main() {
   # Extract version from branch name (release/v1.2.3 → v1.2.3)
@@ -21,13 +22,13 @@ main() {
   if [[ "$INPUT_CREATE_TAG" == "true" ]]; then
     echo "::group::Creating tag: ${tag_name}"
 
-    git config user.name "github-actions[bot]"
-    git config user.email "github-actions[bot]@users.noreply.github.com"
+    # Tag the checked-out commit (the PR merge commit) via the GitHub API so the
+    # default GITHUB_TOKEN suffices — see tag.sh.
+    local commit_sha
+    commit_sha=$(git rev-parse HEAD)
+    create_tag "$GITHUB_REPOSITORY" "$tag_name" "$commit_sha" "Release ${tag_name}"
 
-    git tag -a "$tag_name" -m "Release ${tag_name}"
-    git push origin "$tag_name"
-
-    echo "Tag ${tag_name} created and pushed"
+    echo "Tag ${tag_name} created"
     echo "::endgroup::"
 
     echo "tag=${tag_name}" >> "$GITHUB_OUTPUT"

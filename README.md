@@ -69,7 +69,7 @@ When a PR is merged (and the release label requirement is met, if enabled):
 
 When the release PR (detected by the `release/` branch prefix) is merged:
 
-1. Creates an annotated git tag
+1. Creates an annotated tag (through the GitHub API, so the default `GITHUB_TOKEN` works — no PAT needed)
 2. Optionally creates a GitHub release with auto-generated release notes
 3. Optionally publishes to an npm registry
 
@@ -437,10 +437,15 @@ The workflow needs `contents: write` (for tags and releases) and `pull-requests:
 publishing to GitHub Packages, also add `packages: write`. If using the default `GITHUB_TOKEN`, set these under the
 job's `permissions` key.
 
+The release tag is created through the GitHub API (not `git push`), so the default `GITHUB_TOKEN` is sufficient — you
+do **not** need a personal access token with the `workflow` scope, even when your repo contains files under
+`.github/workflows/`. (A `git push` of the tag would be rejected for `GITHUB_TOKEN` in that case; the API path avoids
+it.)
+
 ## Tests
 
 ```shell
-bats tests/conventional.bats
+bats tests/
 ```
 
 ## Contributing
