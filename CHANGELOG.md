@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.10.0 - 2026-06-29
+
+### Added
+- Use gh api to push tags ([4265ee8](https://github.com/offload-project/release-champion/commit/4265ee88c8ded3680e9434c24b773896cc95b3f7))
+
+### Documentation
+- Update ([c185cb3](https://github.com/offload-project/release-champion/commit/c185cb39de44ba55a7443a999fd6baa7a4a6bf20))
+
 ## v1.9.1 - 2026-06-28
 
 ### Fixed
