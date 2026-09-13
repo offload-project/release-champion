@@ -24,7 +24,20 @@ jobs:
           draft-release: false
       - name: Update floating major tag
         if: steps.release.outputs.tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.release.outputs.tag }}
         run: |
-          major=$(echo "${{ steps.release.outputs.tag }}" | grep -oE '^v[0-9]+')
-          git tag -f "$major" "${{ steps.release.outputs.tag }}"
-          git push origin "$major" --force
+          # The release tag is created via the GitHub API (see scripts/tag.sh), so it
+          # doesn't exist in this clone. Move the major tag through the API as well,
+          # pointing it at the same commit the release tag was created on.
+          major=$(echo "$TAG" | grep -oE '^v[0-9]+')
+          sha=$(git rev-parse HEAD)
+          if gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${major}" > /dev/null 2>&1; then
+            gh api -X PATCH "repos/${GITHUB_REPOSITORY}/git/refs/tags/${major}" \
+              -f sha="$sha" -F force=true > /dev/null
+          else
+            gh api "repos/${GITHUB_REPOSITORY}/git/refs" \
+              -f ref="refs/tags/${major}" -f sha="$sha" > /dev/null
+          fi
+          echo "Moved ${major} to ${TAG} (${sha})"
