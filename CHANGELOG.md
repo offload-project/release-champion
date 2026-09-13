@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.10.1 - 2026-09-13
+
+### Fixed
+- Move floating major tag via GitHub API [#39](https://github.com/offload-project/release-champion/pull/39)
+
 ## v1.10.0 - 2026-06-29
 
 ### Added
